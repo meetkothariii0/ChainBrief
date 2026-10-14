@@ -2,6 +2,8 @@
 
 Personalized weekly briefings with Solidity USDC subscriptions, wallet login, verified email delivery, and stock/news alerts.
 
+Live deployment: https://chain-brief-qc9tvnkw3-kotharimeet826-1691s-projects.vercel.app/
+
 ## What works
 
 - Connect an injected wallet, check network and deployed contracts, mint mock USDC on Anvil, approve a bounded allowance, subscribe and cancel.
