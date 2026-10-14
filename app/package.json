@@ -1,0 +1,42 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "keeper": "node --env-file=.env.local --import tsx scripts/keeper.ts",
+    "alerts": "node --env-file=.env.local --import tsx scripts/alerts.ts",
+    "newsletters": "node --env-file=.env.local --import tsx scripts/newsletters.ts",
+    "mail": "node --env-file=.env.local --import tsx scripts/mail.ts",
+    "sync:local": "node --import tsx scripts/sync-local.ts",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check": "tsc --noEmit",
+    "workers": "node --env-file=.env.local --import tsx scripts/workers.ts",
+    "deploy:local": "node --import tsx scripts/deploy-local.ts",
+    "test:chain": "node --import tsx scripts/smoke-chain.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.104.2",
+    "fast-xml-parser": "^5.11.2",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "viem": "^2.57.5",
+    "wagmi": "^3.7.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}
