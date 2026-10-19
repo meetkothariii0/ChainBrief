@@ -4,6 +4,7 @@ import {chainBriefAbi} from "@/lib/abi";
 import {validatePrefs} from "@/lib/message";
 import {getUser,prefsOf,rateLimit} from "@/lib/db";
 import {storePreferences} from "@/lib/preferences";
+import {deliverQueuedJobNow} from "@/lib/delivery";
 import {sameOrigin,sessionAddress,body,HttpError,fail} from "@/lib/auth";
 export const runtime="nodejs";
 export async function GET(req: NextRequest) {
@@ -20,6 +21,8 @@ export async function POST(req: NextRequest) {
     if(!await isActive(address)) throw new HttpError("No paid subscription. Renew on-chain first.",402);
     const [count]=await publicClient.readContract({address:CHAINBRIEF,abi:chainBriefAbi,functionName:"subs",args:[address]});
     if(prefs.topics.length!==count) throw new HttpError(`Your paid plan covers exactly ${count} topics.`);
-    storePreferences(address,prefs);return Response.json({ok:true,verified:!!getUser(address)?.verified});
+    const verificationJobId=storePreferences(address,prefs);
+    const emailSent=verificationJobId ? await deliverQueuedJobNow(verificationJobId) : false;
+    return Response.json({ok:true,verified:!!getUser(address)?.verified,emailQueued:!!verificationJobId,emailSent});
   } catch(e) {return fail(e);}
 }

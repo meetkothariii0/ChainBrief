@@ -3,6 +3,20 @@ import {sendMail} from "./email";
 import {isActive} from "./chain";
 import type {Mail} from "./db";
 type Job={id:string;address:string;kind:string;payload:string;attempts:number;first_attempt:number};
+export async function deliverQueuedJobNow(id: string) {
+  const job=db.prepare("SELECT * FROM jobs WHERE id=? AND status='queued'").get(id) as Job | undefined;
+  if(!job) return false;
+  try {
+    const mail=JSON.parse(job.payload) as Mail;
+    const providerId=await sendMail(job.id,mail);
+    db.prepare("UPDATE jobs SET status='accepted',provider_id=?,error=NULL,lease=0 WHERE id=? AND status='queued'").run(providerId,job.id);
+    return true;
+  } catch(e) {
+    db.prepare("UPDATE jobs SET error=?,lease=0 WHERE id=? AND status='queued'").run(e instanceof Error?e.message:String(e),job.id);
+    return false;
+  }
+}
+
 export async function deliveryTick() {
   for(let i=0;i<5;i++) {
     const now=Date.now();
