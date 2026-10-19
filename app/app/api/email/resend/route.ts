@@ -11,7 +11,7 @@ export async function POST(req:NextRequest) {
     if(!await isActive(address)) throw new HttpError("No paid subscription.",402);
     resendVerification(address);
     const user=getUser(address);
-    const sent=user?.verify_hash ? await deliverQueuedJobNow(`verify:${user.verify_hash}`) : false;
-    return Response.json({message:sent?"Confirmation email sent. Check your inbox and spam folder.":"Confirmation email queued. Check your email settings and keep the mail worker running."});
+    const delivery=user?.verify_hash ? await deliverQueuedJobNow(`verify:${user.verify_hash}`) : {sent:false};
+    return Response.json({message:delivery.sent?"Confirmation email sent. Check your inbox and spam folder.":`Confirmation email could not be sent: ${delivery.error??"it was queued for retry."}`});
   }catch(e){return fail(e);}
 }

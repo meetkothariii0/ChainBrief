@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const [count]=await publicClient.readContract({address:CHAINBRIEF,abi:chainBriefAbi,functionName:"subs",args:[address]});
     if(prefs.topics.length!==count) throw new HttpError(`Your paid plan covers exactly ${count} topics.`);
     const verificationJobId=storePreferences(address,prefs);
-    const emailSent=verificationJobId ? await deliverQueuedJobNow(verificationJobId) : false;
-    return Response.json({ok:true,verified:!!getUser(address)?.verified,emailQueued:!!verificationJobId,emailSent});
+    const delivery=verificationJobId ? await deliverQueuedJobNow(verificationJobId) : {sent:false};
+    return Response.json({ok:true,verified:!!getUser(address)?.verified,emailQueued:!!verificationJobId,emailSent:delivery.sent,emailError:delivery.error});
   } catch(e) {return fail(e);}
 }

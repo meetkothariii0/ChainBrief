@@ -3,17 +3,18 @@ import {sendMail} from "./email";
 import {isActive} from "./chain";
 import type {Mail} from "./db";
 type Job={id:string;address:string;kind:string;payload:string;attempts:number;first_attempt:number};
-export async function deliverQueuedJobNow(id: string) {
+export async function deliverQueuedJobNow(id: string): Promise<{sent: boolean; error?: string}> {
   const job=db.prepare("SELECT * FROM jobs WHERE id=? AND status='queued'").get(id) as Job | undefined;
-  if(!job) return false;
+  if(!job) return {sent:false};
   try {
     const mail=JSON.parse(job.payload) as Mail;
     const providerId=await sendMail(job.id,mail);
     db.prepare("UPDATE jobs SET status='accepted',provider_id=?,error=NULL,lease=0 WHERE id=? AND status='queued'").run(providerId,job.id);
-    return true;
+    return {sent:true};
   } catch(e) {
-    db.prepare("UPDATE jobs SET error=?,lease=0 WHERE id=? AND status='queued'").run(e instanceof Error?e.message:String(e),job.id);
-    return false;
+    const error=e instanceof Error?e.message:String(e);
+    db.prepare("UPDATE jobs SET error=?,lease=0 WHERE id=? AND status='queued'").run(error,job.id);
+    return {sent:false,error};
   }
 }
 

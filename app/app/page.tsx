@@ -62,7 +62,7 @@ export default function Home() {
   async function save() {
     const data=prefs();await authenticated();setStatus("Saving topics and email…");
     const result=await api("/api/subscribe",data);
-    setStatus(result.verified?"Preferences saved. Your weekly briefing worker will use these topics.":result.emailSent?"Subscription successful. A confirmation email was sent; click its link to receive briefings.":"Preferences saved. The confirmation email is queued; keep the mail worker running to deliver it.");
+    setStatus(result.verified?"Preferences saved. Your weekly briefing worker will use these topics.":result.emailSent?"Subscription successful. A confirmation email was sent; click its link to receive briefings.":result.emailError?`Preferences saved, but email delivery failed: ${result.emailError}`:"Preferences saved. The confirmation email is queued; keep the mail worker running to deliver it.");
   }
   async function connect() {
     if(!connectors[0])throw new Error("Install or enable a wallet browser extension first.");
